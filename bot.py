@@ -21,7 +21,7 @@ class HealthHandler(BaseHTTPRequestHandler):
         <html>
             <head><title>Ticket Bot</title></head>
             <body style="font-family: Arial; text-align: center; padding: 50px;">
-                <h1>🎫 Ticket Bot is Running!</h1>
+                <h1> Ticket Bot is Running!</h1>
                 <p>Status: <span style="color: green;">● Online</span></p>
                 <p>Bot is active on Discord. Use /setup command to create ticket panel.</p>
                 <p><small>UptimeRobot monitoring active</small></p>
@@ -658,3 +658,4 @@ if __name__ == "__main__":
         bot.run(Config.TOKEN)
     except Exception as e:
         print(f"❌ Failed to start bot: {e}")
+
