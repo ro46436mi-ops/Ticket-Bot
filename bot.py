@@ -11,14 +11,15 @@ import asyncio
 from threading import Thread
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
-# ========== HEALTH SERVER FOR RENDER (FIXED) ==========
+# ========== HEALTH SERVER FOR RENDER (FINAL FIX) ==========
 class HealthHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
         self.end_headers()
-        # Pure ASCII HTML - no emojis or special chars
-        self.wfile.write(b"<html><head><title>Ticket Bot</title></head><body style='font-family: Arial; text-align: center; padding: 50px;'><h1>Ticket Bot is Running!</h1><p>Status: <span style='color: green;'>● Online</span></p><p>Bot is active on Discord. Use /setup command to create ticket panel.</p><p><small>UptimeRobot monitoring active</small></p></body></html>")
+        # PURE ASCII - No special characters at all!
+        html = "<html><head><title>Ticket Bot</title></head><body style='font-family: Arial; text-align: center; padding: 50px;'><h1>Ticket Bot is Running!</h1><p>Status: <span style='color: green;'>Online</span></p><p>Bot is active on Discord. Use /setup command to create ticket panel.</p><p><small>UptimeRobot monitoring active</small></p></body></html>"
+        self.wfile.write(html.encode('ascii'))
     
     def log_message(self, format, *args):
         return  # Disable logging
@@ -650,3 +651,4 @@ if __name__ == "__main__":
         bot.run(Config.TOKEN)
     except Exception as e:
         print(f"❌ Failed to start bot: {e}")
+
