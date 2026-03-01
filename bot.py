@@ -11,23 +11,14 @@ import asyncio
 from threading import Thread
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
-# ========== HEALTH SERVER FOR RENDER ==========
+# ========== HEALTH SERVER FOR RENDER (FIXED) ==========
 class HealthHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
         self.end_headers()
-        self.wfile.write(b'''
-        <html>
-            <head><title>Ticket Bot</title></head>
-            <body style="font-family: Arial; text-align: center; padding: 50px;">
-                <h1> Ticket Bot is Running!</h1>
-                <p>Status: <span style="color: green;">● Online</span></p>
-                <p>Bot is active on Discord. Use /setup command to create ticket panel.</p>
-                <p><small>UptimeRobot monitoring active</small></p>
-            </body>
-        </html>
-        ''')
+        # Pure ASCII HTML - no emojis or special chars
+        self.wfile.write(b"<html><head><title>Ticket Bot</title></head><body style='font-family: Arial; text-align: center; padding: 50px;'><h1>Ticket Bot is Running!</h1><p>Status: <span style='color: green;'>● Online</span></p><p>Bot is active on Discord. Use /setup command to create ticket panel.</p><p><small>UptimeRobot monitoring active</small></p></body></html>")
     
     def log_message(self, format, *args):
         return  # Disable logging
@@ -55,6 +46,7 @@ except Exception as e:
     print(f"❌ MongoDB Connection Error: {e}")
     db = None
     tickets_col = None
+    blacklist_col = None
 
 # ========== BOT SETUP ==========
 intents = discord.Intents.default()
@@ -555,7 +547,7 @@ async def blacklist(interaction: discord.Interaction, user: discord.User, reason
             {"$set": {"status": "closed", "closed_at": datetime.utcnow(), "closed_by": "blacklist"}}
         )
 
-# /unblacklist Command - Unblacklist user
+# /unblacklist Command - Remove from blacklist
 @bot.tree.command(name="unblacklist", description="✅ Remove user from blacklist", guild=discord.Object(id=Config.GUILD_ID))
 @app_commands.default_permissions(administrator=True)
 async def unblacklist(interaction: discord.Interaction, user: discord.User):
@@ -571,7 +563,7 @@ async def unblacklist(interaction: discord.Interaction, user: discord.User):
     else:
         await interaction.response.send_message(f"❌ {user.mention} is not blacklisted")
 
-# /help Command - Show commands
+# /help Command - Show all commands
 @bot.tree.command(name="help", description="📋 Show all commands", guild=discord.Object(id=Config.GUILD_ID))
 async def help_command(interaction: discord.Interaction):
     """Show all available commands"""
@@ -658,4 +650,3 @@ if __name__ == "__main__":
         bot.run(Config.TOKEN)
     except Exception as e:
         print(f"❌ Failed to start bot: {e}")
-
