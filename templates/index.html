@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Bot Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        /* Modal Styles */
+        .modal {
+            display: flex;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            color: white;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-header h2 {
+            font-size: 24px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .modal-header .close {
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.7);
+            transition: color 0.3s;
+        }
+
+        .modal-header .close:hover {
+            color: white;
+        }
+
+        .modal-body {
+            line-height: 1.6;
+        }
+
+        .modal-body p {
+            margin: 10px 0;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+
+        .modal-body strong {
+            color: rgba(255, 255, 255, 0.9);
+            display: inline-block;
+            width: 100px;
+        }
+
+        .messages {
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+
+        .message {
+            padding: 12px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            border-left: 3px solid var(--primary);
+        }
+
+        .message strong {
+            color: var(--primary);
+            width: auto;
+            display: inline;
+        }
+
+        .message p {
+            margin: 5px 0;
+            padding: 0;
+            background: none;
+        }
+
+        .message small {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 11px;
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 500;
+            z-index: 2000;
+            animation: slideInRight 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .toast-success {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .toast-error {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .toast-warning {
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Filters */
+        .filters {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .filters select {
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .filters select option {
+            background: var(--darker);
+            color: white;
+        }
+
+        .filters select:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Loading States */
+        .loading {
+            text-align: center;
+            padding: 30px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-left: 10px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            vertical-align: middle;
+        }
+
+        /* Category Items */
+        .category-item {
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .category-item h4 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: var(--primary);
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .category-item label {
+            display: block;
+            margin: 10px 0 5px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 13px;
+        }
+
+        .category-item input,
+        .category-item textarea {
+            width: 100%;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            color: white;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .category-item input:focus,
+        .category-item textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .category-item textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        /* Action Buttons in Categories */
+        .category-item .action-btn {
+            margin-top: 15px;
+            padding: 8px 15px;
+            font-size: 13px;
+        }
+
+        /* Add Category Button */
+        .add-category-btn {
+            margin-top: 20px;
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s, opacity 0.3s;
+            width: 100%;
+            font-size: 16px;
+        }
+
+        .add-category-btn:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+        }
+
+        /* Code styling */
+        code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            color: #ff9f43;
+        }
+
+        /* Table enhancements */
+        .table-container {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        table {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+        }
+
+        th {
+            background: rgba(0, 0, 0, 0.3);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Stat card enhancements */
+        .stat-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(135deg, transparent 0%, rgba(255, 255, 255, 0.1) 100%);
+            transform: rotate(45deg);
+            transition: transform 0.5s;
+        }
+
+        .stat-card:hover::after {
+            transform: rotate(45deg) translate(10%, 10%);
+        }
+
+        /* Header actions */
+        .header-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .refresh-btn {
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .refresh-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(180deg);
+        }
+
+        /* Search box */
+        .search-box {
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            width: 250px;
+            font-size: 14px;
+        }
+
+        .search-box::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .page-btn {
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .page-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .page-btn.active {
+            background: var(--primary);
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 50px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .empty-state i {
+            font-size: 50px;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        /* Logout button */
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 8px 15px;
+            background: rgba(237, 66, 69, 0.2);
+            border: 1px solid var(--danger);
+            border-radius: 8px;
+            color: var(--danger);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .logout-btn:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Responsive fixes */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .filters {
+                width: 100%;
+            }
+
+            .filters select {
+                width: 100%;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <h2>🎫 Ticket Bot</h2>
+                <small style="color: rgba(255,255,255,0.5); font-size: 12px;">Professional Edition</small>
+            </div>
+            
+            <ul class="nav-links">
+                <li class="active"><a href="#dashboard">📊 Dashboard</a></li>
+                <li><a href="#tickets">🎟️ Tickets</a></li>
+                <li><a href="#settings">⚙️ Settings</a></li>
+                <li><a href="#blacklist">⛔ Blacklist</a></li>
+                <li><a href="#logs">📝 Logs</a></li>
+            </ul>
+            
+            <div class="auth-section">
+                <input type="password" id="auth-key" placeholder="Enter Dashboard Key">
+                <button onclick="authenticate()" class="auth-btn">Authenticate</button>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <main class="content" id="main-content">
+            <!-- Content will be loaded dynamically -->
+            <div class="loading">Loading dashboard...</div>
+        </main>
+    </div>
+
+    <script src="/static/dashboard.js"></script>
+    <script>
+        // Additional initialization if needed
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Dashboard loaded');
+            
+            // Add keyboard shortcut for refresh (Ctrl+R)
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.key === 'r') {
+                    e.preventDefault();
+                    const activeSection = document.querySelector('.nav-links li.active a')?.getAttribute('href')?.substring(1) || 'dashboard';
+                    loadSection(activeSection);
+                }
+            });
+
+            // Add logout button when authenticated
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                        const authSection = document.querySelector('.auth-section');
+                        if (authSection && authSection.style.display === 'none') {
+                            addLogoutButton();
+                        }
+                    }
+                });
+            });
+
+            const authSection = document.querySelector('.auth-section');
+            if (authSection) {
+                observer.observe(authSection, { attributes: true });
+            }
+        });
+
+        function addLogoutButton() {
+            let logoutBtn = document.querySelector('.logout-btn');
+            if (!logoutBtn) {
+                logoutBtn = document.createElement('button');
+                logoutBtn.className = 'logout-btn';
+                logoutBtn.innerHTML = '🚪 Logout';
+                logoutBtn.onclick = logout;
+                document.querySelector('.sidebar').appendChild(logoutBtn);
+            }
+        }
+
+        function logout() {
+            sessionStorage.removeItem('dashboardKey');
+            location.reload();
+        }
+
+        // Override fetch to include auth header automatically
+        const originalFetch = window.fetch;
+        window.fetch = function(url, options = {}) {
+            if (authKey) {
+                options.headers = {
+                    ...options.headers,
+                    'X-Dashboard-Key': authKey
+                };
+            }
+            return originalFetch(url, options);
+        };
+
+        // Handle errors globally
+        window.addEventListener('unhandledrejection', (event) => {
+            console.error('Unhandled promise rejection:', event.reason);
+            if (event.reason?.status === 401) {
+                showError('Session expired. Please login again.');
+                sessionStorage.removeItem('dashboardKey');
+                setTimeout(() => location.reload(), 2000);
+            }
+        });
+    </script>
+</body>
+</html>
