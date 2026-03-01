@@ -18,7 +18,7 @@ class Config:
     # MongoDB
     MONGODB_URI = os.getenv('MONGODB_URI')
     
-    # Ticket Categories - Simple
+    # Ticket Categories
     CATEGORIES = [
         {"name": "🎮 Free Fire Panel", "value": "ff_panel", "emoji": "🎮"},
         {"name": "🆔 Free Fire IDs", "value": "ff_ids", "emoji": "🆔"},
