@@ -1,8 +1,0 @@
-.env
-node_modules
-.cache
-.npm
-.ssh
-*.txt
-__pycache__
-*.pyc
