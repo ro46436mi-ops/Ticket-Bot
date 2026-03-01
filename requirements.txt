@@ -4,14 +4,18 @@ motor==3.3.2
 pymongo==4.6.1
 dnspython==2.4.2
 
-# Web Dashboard
+# Web Dashboard - ASGI Server
 Flask==3.0.0
 flask-cors==4.0.0
 Werkzeug==3.0.1
 aiohttp==3.9.1
+hypercorn==0.17.3
+quart==0.19.6
 
 # Utilities
 python-dotenv==1.0.0
 asyncio==3.4.3
 humanize==4.9.0
 colorama==0.4.6
+httpx==0.27.2
+uvloop==0.19.0
