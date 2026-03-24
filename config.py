@@ -1,28 +1,16 @@
-import os
-from dotenv import load_dotenv
+# ===== CONFIGURATION =====
+# Hardcoded IDs
+GUILD_ID = 1344323930923601992
+LEAVE_CHANNEL_ID = 1407852089639436328
+STAFF_ROLE_IDS = [1406441808619376690, 1446566572763381963]
+TICKET_CATEGORY_ID = 1446560952505073846
+LOG_CHANNEL_ID = 1446566574181056646
 
-load_dotenv()
-
-class Config:
-    # Bot
-    TOKEN = os.getenv('DISCORD_TOKEN')
-    GUILD_ID = int(os.getenv('GUILD_ID', 0))
-    
-    # Channels & Roles
-    TICKET_CATEGORY = int(os.getenv('TICKET_CATEGORY_ID', 0))
-    SUPPORT_ROLE = int(os.getenv('SUPPORT_ROLE_ID', 0))
-    BOT_ROLE = int(os.getenv('BOT_ROLE_ID', 0))
-    ADMIN_ROLE = int(os.getenv('ADMIN_ROLE_ID', 0))
-    LOG_CHANNEL = int(os.getenv('LOG_CHANNEL_ID', 0))
-    
-    # MongoDB
-    MONGODB_URI = os.getenv('MONGODB_URI')
-    
-    # Ticket Categories
-    CATEGORIES = [
-        {"name": "🎮 Free Fire Panel", "value": "ff_panel", "emoji": "🎮"},
-        {"name": "🆔 Free Fire IDs", "value": "ff_ids", "emoji": "🆔"},
-        {"name": "🔧 Root Service", "value": "root", "emoji": "🔧"},
-        {"name": "⚙️ Other", "value": "other", "emoji": "⚙️"},
-        {"name": "❓ Any Queries", "value": "general", "emoji": "❓"}
-    ]
+# Ticket Categories
+TICKET_OPTIONS = [
+    {"label": "🔥 Free Fire Panel", "value": "free_fire_panel"},
+    {"label": "🆔 Free Fire ID's", "value": "free_fire_ids"},
+    {"label": "🌐 Root Service's", "value": "root_services"},
+    {"label": "📦 Others", "value": "others"},
+    {"label": "❓ Any Help or Issue", "value": "help_issue"},
+]
